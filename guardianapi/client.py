@@ -3,11 +3,11 @@ try:
 except ImportError:
     from django.utils import simplejson
 import urllib, urlparse, time, re, cgi
-from errors import APIKeyError, ItemNotFound, URLNotRecognised
+from errors import APIKeyError, ItemNotFound, URLNotRecognised, HTTPError
 import fetchers
 
 class Client(object):
-    base_url = 'http://api.guardianapis.com/'
+    base_url = 'http://content.guardianapis.com/'
     # Map paths (e.g. /content/search) to their corresponding methods:
     path_method_lookup = (
         (re.compile('^/content/search$'), 'search'),
@@ -43,22 +43,22 @@ class Client(object):
         return kwargs2
 
     def search(self, **kwargs):
-        json = self._do_call('/content/search', **kwargs)
+        json = self._do_call('/search', **kwargs)
         return SearchResults(self, kwargs, json)
 
     def tags(self, **kwargs):
-        json = self._do_call('/content/tags', **kwargs)
+        json = self._do_call('/tags', **kwargs)
         return TagResults(self, kwargs, json)
 
     def item(self, item_id):
         try:
-            json = self._do_call('/content/item/%s' % item_id)
+            json = self._do_call('/%s' % item_id)
         except HTTPError, h:
             if str(h.status_code) == '404':
                 raise ItemNotFound(item_id)
             else:
                 raise
-        return json['content']
+        return json['response']['content']
 
     def request(self, url):
         "Start with an already constructed URL e.g. apiUrl from a response"
@@ -142,29 +142,29 @@ class SearchResults(Results):
     default_per_page = 10
 
     def count(self):
-        return self.json['search']['count']
+        return self.json['response']['total']
 
     def start_index(self):
-        return self.json['search']['startIndex']
+        return self.json['response']['startIndex']
 
     def results(self):
-        return self.json['search']['results']
+        return self.json['response']['results']
 
     def filters(self):
-        return self.json['search']['filters']
+        return self.json['response']['filters']
 
 class TagResults(Results):
     client_method = 'tags'
     default_per_page = 10
 
     def count(self):
-        return self.json['subjects']['count']
+        return self.json['response']['count']
 
     def start_index(self):
-        return self.json['subjects']['startIndex']
+        return self.json['response']['startIndex']
 
     def results(self):
-        return self.json['subjects']['tags']
+        return self.json['response']['results']
 
 class AllResults(object):
     "Results wrapper that knows how to auto-paginate a result set"

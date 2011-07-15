@@ -7,7 +7,7 @@ Usage
 >>> results.count()
 36
 >>> for item in results:
-...     print item['headline']
+...     print item['webTitle']
 
 This will return the first ten results. To retrieve everything (by 
 paginating across all pages automatically), do the following:
