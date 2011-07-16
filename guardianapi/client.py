@@ -8,11 +8,11 @@ import fetchers
 
 class Client(object):
     base_url = 'http://content.guardianapis.com/'
-    # Map paths (e.g. /content/search) to their corresponding methods:
+    # Map paths (e.g. /search) to their corresponding methods:
     path_method_lookup = (
-        (re.compile('^/content/search$'), 'search'),
-        (re.compile('^/content/tags$'), 'tags'),
-        (re.compile('^/content/item/(\d+)$'), 'item'),
+        (re.compile('^/search$'), 'search'),
+        (re.compile('^/tags$'), 'tags'),
+        (re.compile('^/(\d+)$'), 'item'),
     )
 
     def __init__(self, api_key, fetcher=None):

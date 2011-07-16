@@ -18,11 +18,8 @@ class MockFetcher(Fetcher):
         endpoint = bits.path.split('/')[-1]
         args = tuple()
         if endpoint not in ('search', 'tags'):
-            if bits.path.startswith('/content/item'):
-                args = (endpoint,)
-                endpoint = 'item'
-            else:
-                assert False, 'Unrecognised URL: %s' % url
+            args = (endpoint,)
+            endpoint = 'item'
 
         kwargs = cgi.parse_qs(bits.query)
         # foo=bar becomes {'foo': ['bar']} - collapse single values
@@ -56,8 +53,8 @@ class MockFetcher(Fetcher):
         )
 
         return {
-            "search": {
-                "count": self.fake_total_results,
+            "response": {
+                "total": self.fake_total_results,
                 "startIndex": start_index,
                 "results": [
                     self.fake_article(article_id)
@@ -86,10 +83,10 @@ class MockFetcher(Fetcher):
         )
 
         return {
-            "subjects": {
+            "response": {
                 "count": self.fake_total_results,
                 "startIndex": start_index,
-                "tags": [{
+                "results": [{
                     "name": "Tag %s" % i,
                     "section": "Tags",
                     "filter": "/tag/%s" % i,
@@ -100,7 +97,11 @@ class MockFetcher(Fetcher):
         }
 
     def do_item(self, rest_of_url, **kwargs):
-        return {'content': self.fake_article(rest_of_url.replace('/', ''))}
+        return {
+            'response': {
+                'content': self.fake_article(rest_of_url.replace('/', ''))
+                }
+            }
 
     def fake_article(self, article_id):
         return {

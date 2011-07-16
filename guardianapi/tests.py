@@ -120,7 +120,7 @@ class ClientTestCase(BaseTestCase):
 
     def test_request_search(self):
         "client.request(url-to-search-results) should work correctly"
-        url = 'http://gdn/content/search?q=obama'
+        url = 'http://gdn/search?q=obama'
         self.assertRequestCount(0)
         results = self.client.request(url)
         self.assertEqual(results.kwargs['q'][0], 'obama')
@@ -129,7 +129,7 @@ class ClientTestCase(BaseTestCase):
 
     def test_request_content(self):
         "client.fetch(url-to-content) should work correctly"
-        url = 'http://gdn/content/item/123'
+        url = 'http://gdn/123'
         self.assertRequestCount(0)
         results = self.client.request(url)
         self.assertRequestCount(1)
