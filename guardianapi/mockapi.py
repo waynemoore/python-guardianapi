@@ -8,11 +8,11 @@ import urlparse, cgi, simplejson
 class MockFetcher(Fetcher):
     def __init__(self):
         self.reset()
-    
+
     def reset(self):
         self.fetched = [] # (url, kwargs-dict) pairs
         self.fake_total_results = 51
-    
+
     def get(self, url):
         bits = urlparse.urlparse(url)
         endpoint = bits.path.split('/')[-1]
@@ -23,20 +23,20 @@ class MockFetcher(Fetcher):
                 endpoint = 'item'
             else:
                 assert False, 'Unrecognised URL: %s' % url
-        
+
         kwargs = cgi.parse_qs(bits.query)
         # foo=bar becomes {'foo': ['bar']} - collapse single values
         for key in kwargs:
             if isinstance(kwargs[key], list) and len(kwargs[key]) == 1:
                 kwargs[key] = kwargs[key][0]
-        
+
         method = getattr(self, 'do_%s' % endpoint)
         json = method(*args, **kwargs)
-        
+
         self.record(url, kwargs, json)
-        
+
         return {}, simplejson.dumps(json, indent=4)
-    
+
     def record(self, url, args, json):
         "Record attempted URL fetches so we can run assertions against them"
         self.fetched.append((url, args))
@@ -46,7 +46,7 @@ class MockFetcher(Fetcher):
         #     print '      Got %s results' % len(json['search']['results'])
         # except KeyError:
         #     pass
-    
+
     def do_search(self, **kwargs):
         start_index = int(kwargs.get('start-index', 0))
         count = int(kwargs.get('count', 10))
@@ -54,13 +54,13 @@ class MockFetcher(Fetcher):
         num_results = min(
             self.fake_total_results - start_index, count
         )
-        
+
         return {
             "search": {
                 "count": self.fake_total_results,
                 "startIndex": start_index,
                 "results": [
-                    self.fake_article(article_id) 
+                    self.fake_article(article_id)
                     for article_id in range(
                         start_index, start_index + num_results
                     )
@@ -76,7 +76,7 @@ class MockFetcher(Fetcher):
                 } for i in range(4)]
             }
         }
-    
+
     def do_tags(self, **kwargs):
         start_index = int(kwargs.get('start-index', 0))
         count = int(kwargs.get('count', 10))
@@ -84,7 +84,7 @@ class MockFetcher(Fetcher):
         num_results = min(
             self.fake_total_results - start_index, count
         )
-        
+
         return {
             "subjects": {
                 "count": self.fake_total_results,
@@ -98,10 +98,10 @@ class MockFetcher(Fetcher):
                 } for i in range(start_index, start_index + num_results)],
             }
         }
-    
+
     def do_item(self, rest_of_url, **kwargs):
         return {'content': self.fake_article(rest_of_url.replace('/', ''))}
-    
+
     def fake_article(self, article_id):
         return {
             "id": str(article_id),
@@ -122,7 +122,7 @@ class MockFetcher(Fetcher):
             },
             "tags": self.fake_tags(article_id)
         }
-    
+
     def fake_tags(self, article_id):
         return [{
             "name": "Article",
