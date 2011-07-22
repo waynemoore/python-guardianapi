@@ -13,10 +13,11 @@ This will return the first ten results. To retrieve everything (by
 paginating across all pages automatically), do the following:
 
 >>> for item in results.all():
-...     print item['headline']
+...     print item['webTitle']
 
 To access the filters for a result set:
 
+# Warning -- filters not currently working
 >>> for filter in results.filters():
 ...    print filter
 

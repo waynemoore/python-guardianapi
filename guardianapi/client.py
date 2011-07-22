@@ -43,6 +43,12 @@ class Client(object):
         return kwargs2
 
     def search(self, **kwargs):
+        """
+        Queries the guardian content search api.
+
+        page_size -- number of results to return per page
+        page -- page number to start from
+        """
         json = self._do_call('/search', **kwargs)
         return SearchResults(self, kwargs, json)
 
@@ -102,7 +108,7 @@ class Results(object):
         return 0
 
     def per_page(self):
-        return self.kwargs.get('count', self.default_per_page)
+        return self.kwargs.get('page_size', self.default_per_page)
 
     def __getitem__(self, key):
         return self.json[key]
@@ -119,11 +125,11 @@ class Results(object):
             return None
         method = getattr(self.client, self.client_method)
         kwargs = dict(self.kwargs)
-        start_index = kwargs.get('start_index', 0)
-        count = kwargs.get('count', self.default_per_page)
+        page = kwargs.get('page', 1)
+        page_size = kwargs.get('page_size', self.default_per_page)
         # Adjust the pagination arguments
-        kwargs['count'] = count
-        kwargs['start_index'] = start_index + count
+        kwargs['page_size'] = page_size
+        kwargs['page'] = page + 1
         return method(**kwargs)
 
     def __iter__(self):
